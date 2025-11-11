@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager View</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .task {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 5px 0;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .buttons button {
+        margin-left: 5px;
+      }
+
+      input[type="date"] {
+        padding: 5px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      }
+
+      input[type="datetime-local"],
+      input[type="text"],
+      textarea {
+        padding: 5px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      }
+
+      button {
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+
+      .date-selector {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .date-selector button {
+        padding: 5px 10px;
+        margin: 0 5px;
+      }
+
+      /* Modal (card) styling */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 400px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      .modal-actions {
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Task Manager</h1>
+
+      <!-- Date Selector -->
+      <div class="date-selector">
+        <button id="prev-day">&lt;</button>
+        <input type="date" id="task-date" />
+        <button id="next-day">&gt;</button>
+        <button id="create-btn">Create</button>
+        <div
+          id="formatted-date"
+          style="margin-top: 5px; font-size: 14px; color: #555"
+        ></div>
+      </div>
+
+      <!-- Task List -->
+      <div id="task-list"></div>
+    </div>
+
+    <!-- Modal for Creating Task -->
+    <div class="modal" id="create-modal">
+      <div class="modal-content">
+        <div class="modal-header">Create New Task</div>
+        <div class="modal-body">
+          <label>Title</label>
+          <input type="text" id="task-title" />
+
+          <label>Note</label>
+          <textarea id="task-note" rows="3"></textarea>
+
+          <label>To</label>
+          <input type="text" id="task-to" />
+
+          <label>Attachment</label>
+          <input type="checkbox" id="task-attachment" /> Has Attachment
+
+          <label>Notification Date</label>
+          <input type="datetime-local" id="task-notification" />
+        </div>
+        <div class="modal-actions">
+          <button id="cancel-btn">Cancel</button>
+          <button id="save-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const taskListEl = document.getElementById("task-list");
+      const taskDateEl = document.getElementById("task-date");
+      const formattedDateEl = document.getElementById("formatted-date");
+      const modal = document.getElementById("create-modal");
+
+      // --- Utility ---
+      function formatDateForApi(dateStr) {
+        const d = new Date(dateStr);
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return `${dd}-${mm}-${yyyy}`; // e.g., 11-11-2025
+      }
+
+      function formatDateDisplay(dateStr) {
+        if (!dateStr) return "-";
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mi = String(d.getMinutes()).padStart(2, "0");
+        return `${dd}-${mm}-${yyyy} ${hh}:${mi}`;
+      }
+
+      // --- Set default date to today ---
+      function setToday() {
+        const today = new Date();
+        taskDateEl.value = today.toISOString().split("T")[0];
+        formattedDateEl.textContent = `Selected: ${formatDateForApi(today)}`;
+      }
+
+      // --- Change date by ±1 day ---
+      function changeDate(days) {
+        const currentDate = new Date(taskDateEl.value);
+        currentDate.setDate(currentDate.getDate() + days);
+        taskDateEl.value = currentDate.toISOString().split("T")[0];
+        formattedDateEl.textContent = `Selected: ${formatDateForApi(
+          taskDateEl.value
+        )}`;
+        fetchTasksByDate();
+      }
+
+      document.getElementById("prev-day").onclick = () => changeDate(-1);
+      document.getElementById("next-day").onclick = () => changeDate(1);
+
+      // --- Modal Controls ---
+      document.getElementById("create-btn").onclick = () => {
+        modal.style.display = "flex";
+      };
+
+      document.getElementById("cancel-btn").onclick = () => {
+        modal.style.display = "none";
+        clearModalFields();
+      };
+
+      // --- Save (POST /task/create) ---
+      document.getElementById("save-btn").onclick = async () => {
+        const dto = {
+          id: null,
+          title: document.getElementById("task-title").value,
+          note: document.getElementById("task-note").value,
+          to: document.getElementById("task-to").value,
+          attachment: document.getElementById("task-attachment").checked,
+          notificationDate: document.getElementById("task-notification").value
+            ? formatDateDisplay(
+                document.getElementById("task-notification").value
+              )
+            : null,
+          createDate: formatDateDisplay(new Date().toISOString()),
+        };
+
+        try {
+          const response = await fetch("/task/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dto),
+          });
+
+          if (response.ok) {
+            alert("Task created successfully!");
+            modal.style.display = "none";
+            clearModalFields();
+            fetchTasksByDate();
+          } else {
+            alert("error");
+          }
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      };
+
+      function clearModalFields() {
+        document.getElementById("task-title").value = "";
+        document.getElementById("task-note").value = "";
+        document.getElementById("task-to").value = "";
+        document.getElementById("task-attachment").checked = false;
+        document.getElementById("task-notification").value = "";
+      }
+
+      // --- Fetch tasks by date ---
+      async function fetchTasksByDate() {
+        const selectedDate = taskDateEl.value;
+        if (!selectedDate) return;
+
+        const formatted = formatDateForApi(selectedDate);
+        formattedDateEl.textContent = `Selected: ${formatted}`;
+
+        try {
+          const response = await fetch(`/task/by-date?date=${formatted}`);
+          if (!response.ok) {
+            taskListEl.innerHTML = `<p style="text-align:center;color:red;">Error fetching tasks.</p>`;
+            return;
+          }
+
+          const data = await response.json();
+          renderTasks(data);
+        } catch (err) {
+          console.error("Error fetching tasks", err);
+        }
+      }
+
+      // --- Render tasks ---
+      function renderTasks(tasks = []) {
+        taskListEl.innerHTML = "";
+        if (tasks.length === 0) {
+          taskListEl.innerHTML =
+            "<p style='text-align:center;'>No tasks for this date.</p>";
+          return;
+        }
+
+        tasks.forEach((task) => {
+          const taskEl = document.createElement("div");
+          taskEl.className = "task";
+          taskEl.innerHTML = `
+            <div>
+              <strong>${task.title}</strong><br/>
+              <small>${task.note || ""}</small><br/>
+              <small>To: ${task.to || "-"}</small><br/>
+              <small>Notification: ${formatDateDisplay(
+                task.notificationDate
+              )}</small><br/>
+              <small>Created: ${formatDateDisplay(task.createDate)}</small>
+            </div>
+            <div class="buttons">
+              <button onclick="deleteTask('${task.id}')">Delete</button>
+            </div>
+          `;
+          taskListEl.appendChild(taskEl);
+        });
+      }
+
+      // --- Delete task ---
+      async function deleteTask(id) {
+        await fetch(`/task/delete/${id}`, { method: "DELETE" });
+        fetchTasksByDate();
+      }
+
+      // --- Initial setup ---
+      setToday();
+      fetchTasksByDate();
+      taskDateEl.addEventListener("change", fetchTasksByDate);
+    </script>
+  </body>
+</html>

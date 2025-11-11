@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    ports:
+      - "27016:27017"
+    volumes:
+      - ../mongo-data:/data/db
+
+  task-notification:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: task-notification
+    volumes:
+      - ..:/app
+    ports:
+      - "8000:8000"
+      - "5005:5005" # Debugging port
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:

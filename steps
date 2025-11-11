@@ -1,0 +1,14 @@
+done 1) add backend in spring
+done 2) add docker
+done 3) add mongoDB -> connect it to backend
+4) add view and endpoints (crud)
+
+add update/delete
+
+then this ->
+
+5) add cron job
+6) add sendgrid
+
+
+mail sender
