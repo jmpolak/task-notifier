@@ -5,10 +5,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+
 import jmpolak.task_notification.core.entity.Task;
 import jmpolak.task_notification.core.port.ITaskRepository;
 import jmpolak.task_notification.infrastructure.db.mongo.model.TaskModel;
@@ -38,12 +41,6 @@ public class TaskRepository implements ITaskRepository{
     }
 
     @Override
-    public void update() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
-    }
-
-    @Override
     public List<Task> findTasksByDate(LocalDate date) {
         // Convert LocalDate to start/end of day
         LocalDateTime startOfDay = date.atStartOfDay();
@@ -52,9 +49,30 @@ public class TaskRepository implements ITaskRepository{
         // Build Mongo query
         Query query = new Query();
         query.addCriteria(Criteria.where("notificationDate").gte(startOfDay).lte(endOfDay));
-
+        query.with(Sort.by(Sort.Direction.ASC, "notificationDate"));
         List<Task> tasks = mongoClient.find(query, TaskModel.class).stream().map(lm -> TaskMapper.toDomain(lm)).toList();
         return tasks;
+    }
+
+    @Override
+    public boolean remove(String id) {
+        Query query = new Query(Criteria.where("_id").is(id));
+        return mongoClient.remove(query, TaskModel.class).wasAcknowledged();
+    }
+
+    @Override
+    public Task update(String id, Task task){
+                Query query = new Query(Criteria.where("_id").is(id));
+
+        Update update = new Update()
+            .set("title", task.getTitle())
+            .set("note", task.getNote())
+            .set("to", task.getTo())
+            .set("attachment", task.isAttachment())
+            .set("notificationDate", task.getNotificationDate());
+
+        // Find and update the document, returning the updated document
+        return TaskMapper.toDomain(mongoClient.findAndModify(query, update, TaskModel.class));
     }
     
 }

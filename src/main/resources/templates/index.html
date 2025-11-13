@@ -123,7 +123,7 @@
       <div id="task-list"></div>
     </div>
 
-    <!-- Modal for Creating Task -->
+    <!-- Modal for Creating/Updating Task -->
     <div class="modal" id="create-modal">
       <div class="modal-content">
         <div class="modal-header">Create New Task</div>
@@ -135,7 +135,7 @@
           <textarea id="task-note" rows="3"></textarea>
 
           <label>To</label>
-          <input type="text" id="task-to" />
+          <input type="text" id="task-to" autocomplete="on"/>
 
           <label>Attachment</label>
           <input type="checkbox" id="task-attachment" /> Has Attachment
@@ -144,8 +144,8 @@
           <input type="datetime-local" id="task-notification" />
         </div>
         <div class="modal-actions">
-          <button id="cancel-btn">Cancel</button>
           <button id="save-btn">Save</button>
+          <button id="cancel-btn">Cancel</button>
         </div>
       </div>
     </div>
@@ -156,13 +156,17 @@
       const formattedDateEl = document.getElementById("formatted-date");
       const modal = document.getElementById("create-modal");
 
-      // --- Utility ---
+      let isEditMode = false;
+      let editingTaskId = null;
+      let tasksData = []; // store tasks for the selected date
+
+      // --- Utility functions ---
       function formatDateForApi(dateStr) {
         const d = new Date(dateStr);
         const dd = String(d.getDate()).padStart(2, "0");
         const mm = String(d.getMonth() + 1).padStart(2, "0");
         const yyyy = d.getFullYear();
-        return `${dd}-${mm}-${yyyy}`; // e.g., 11-11-2025
+        return `${dd}-${mm}-${yyyy}`;
       }
 
       function formatDateDisplay(dateStr) {
@@ -189,9 +193,7 @@
         const currentDate = new Date(taskDateEl.value);
         currentDate.setDate(currentDate.getDate() + days);
         taskDateEl.value = currentDate.toISOString().split("T")[0];
-        formattedDateEl.textContent = `Selected: ${formatDateForApi(
-          taskDateEl.value
-        )}`;
+        formattedDateEl.textContent = `Selected: ${formatDateForApi(taskDateEl.value)}`;
         fetchTasksByDate();
       }
 
@@ -206,42 +208,10 @@
       document.getElementById("cancel-btn").onclick = () => {
         modal.style.display = "none";
         clearModalFields();
-      };
-
-      // --- Save (POST /task/create) ---
-      document.getElementById("save-btn").onclick = async () => {
-        const dto = {
-          id: null,
-          title: document.getElementById("task-title").value,
-          note: document.getElementById("task-note").value,
-          to: document.getElementById("task-to").value,
-          attachment: document.getElementById("task-attachment").checked,
-          notificationDate: document.getElementById("task-notification").value
-            ? formatDateDisplay(
-                document.getElementById("task-notification").value
-              )
-            : null,
-          createDate: formatDateDisplay(new Date().toISOString()),
-        };
-
-        try {
-          const response = await fetch("/task/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dto),
-          });
-
-          if (response.ok) {
-            alert("Task created successfully!");
-            modal.style.display = "none";
-            clearModalFields();
-            fetchTasksByDate();
-          } else {
-            alert("error");
-          }
-        } catch (error) {
-          alert("Error: " + error.message);
-        }
+        isEditMode = false;
+        editingTaskId = null;
+        document.querySelector(".modal-header").textContent = "Create New Task";
+        document.getElementById("save-btn").textContent = "Save";
       };
 
       function clearModalFields() {
@@ -251,6 +221,54 @@
         document.getElementById("task-attachment").checked = false;
         document.getElementById("task-notification").value = "";
       }
+
+      // --- Save (Create / Update) ---
+      document.getElementById("save-btn").onclick = async () => {
+        const dto = {
+          title: document.getElementById("task-title").value,
+          note: document.getElementById("task-note").value,
+          to: document.getElementById("task-to").value,
+          attachment: document.getElementById("task-attachment").checked,
+          notificationDate: document.getElementById("task-notification").value
+            ? formatDateDisplay(document.getElementById("task-notification").value)
+            : null,
+        };
+
+        try {
+          let url, method, successMsg;
+          if (isEditMode && editingTaskId) {
+            url = `/task/update/${editingTaskId}`;
+            method = "PUT";
+            successMsg = "Task updated successfully!";
+          } else {
+            url = "/task/create";
+            method = "POST";
+            successMsg = "Task created successfully!";
+          }
+
+          const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dto),
+          });
+
+          if (response.ok) {
+            alert(successMsg);
+            modal.style.display = "none";
+            clearModalFields();
+            fetchTasksByDate();
+          } else {
+            alert("Error while saving task.");
+          }
+        } catch (error) {
+          alert("Error: " + error.message);
+        } finally {
+          isEditMode = false;
+          editingTaskId = null;
+          document.querySelector(".modal-header").textContent = "Create New Task";
+          document.getElementById("save-btn").textContent = "Save";
+        }
+      };
 
       // --- Fetch tasks by date ---
       async function fetchTasksByDate() {
@@ -267,8 +285,8 @@
             return;
           }
 
-          const data = await response.json();
-          renderTasks(data);
+          tasksData = await response.json(); // store tasks locally
+          renderTasks(tasksData);
         } catch (err) {
           console.error("Error fetching tasks", err);
         }
@@ -278,8 +296,7 @@
       function renderTasks(tasks = []) {
         taskListEl.innerHTML = "";
         if (tasks.length === 0) {
-          taskListEl.innerHTML =
-            "<p style='text-align:center;'>No tasks for this date.</p>";
+          taskListEl.innerHTML = "<p style='text-align:center;'>No tasks for this date.</p>";
           return;
         }
 
@@ -291,12 +308,10 @@
               <strong>${task.title}</strong><br/>
               <small>${task.note || ""}</small><br/>
               <small>To: ${task.to || "-"}</small><br/>
-              <small>Notification: ${formatDateDisplay(
-                task.notificationDate
-              )}</small><br/>
-              <small>Created: ${formatDateDisplay(task.createDate)}</small>
+              <small>Notification: ${formatDateDisplay(task.notificationDate)}</small><br/>
             </div>
             <div class="buttons">
+              <button onclick="editTask('${task.id}')">Update</button>
               <button onclick="deleteTask('${task.id}')">Delete</button>
             </div>
           `;
@@ -308,6 +323,27 @@
       async function deleteTask(id) {
         await fetch(`/task/delete/${id}`, { method: "DELETE" });
         fetchTasksByDate();
+      }
+
+      // --- Edit task using already-loaded data ---
+      function editTask(id) {
+        const task = tasksData.find(t => t.id === id);
+        if (!task) return;
+
+        document.getElementById("task-title").value = task.title;
+        document.getElementById("task-note").value = task.note;
+        document.getElementById("task-to").value = task.to;
+        document.getElementById("task-attachment").checked = task.attachment;
+        document.getElementById("task-notification").value = task.notificationDate
+          ? new Date(task.notificationDate).toISOString().slice(0, 16)
+          : "";
+
+        isEditMode = true;
+        editingTaskId = id;
+        document.querySelector(".modal-header").textContent = "Update Task";
+        document.getElementById("save-btn").textContent = "Update";
+
+        modal.style.display = "flex";
       }
 
       // --- Initial setup ---

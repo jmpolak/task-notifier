@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import jmpolak.task_notification.application.service.TaskService;
 import jmpolak.task_notification.web.dto.CreateTaskDto;
 import jmpolak.task_notification.web.dto.ResponseTaskDto;
+import jmpolak.task_notification.web.dto.UpdateTaskDto;
 
 @RestController
 @RequestMapping("/task")
@@ -47,14 +48,14 @@ public class TaskController{
         return ResponseTaskDto.toResponse(taskService.saveTask(CreateTaskDto.toEntity(entity)));
     }
 
-    @PutMapping("update/{id}") // update task
-    public String updateTask(@PathVariable String id, @RequestBody String entity) {
-        return entity;
+    @PutMapping("update/{id}")
+    public ResponseTaskDto updateTask(@PathVariable String id, @Valid @RequestBody UpdateTaskDto entity) {
+        return ResponseTaskDto.toResponse(taskService.updateTask(id, UpdateTaskDto.toEntity(entity)));
     }
 
-    @DeleteMapping("delete/{id}") // update task
-    public String deleteTask(@PathVariable String id) {
-        return id;
+    @DeleteMapping("delete/{id}")
+    public boolean deleteTask(@PathVariable String id) {
+        return taskService.deleteTask(id);
     }
     
     

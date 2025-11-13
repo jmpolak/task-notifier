@@ -1,9 +1,12 @@
 done 1) add backend in spring
 done 2) add docker
 done 3) add mongoDB -> connect it to backend
-4) add view and endpoints (crud)
+done 4) add view and endpoints (crud) add update/delete
 
-add update/delete
+change timezone in docker
+SEND TIMESTAMP FROM FRONT WITH TZ AND CONVERT IT INTO DOCKER TZ
+Minify html
+autocomplete email
 
 then this ->
 

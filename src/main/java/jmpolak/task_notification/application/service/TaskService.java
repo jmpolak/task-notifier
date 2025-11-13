@@ -26,4 +26,12 @@ public class TaskService{
         return this.iTaskRepository.save(taskDto);
     }
 
+    public boolean deleteTask(String id){
+        return this.iTaskRepository.remove(id);
+    }
+
+    public Task updateTask(String id, Task task){
+        return this.iTaskRepository.update(id, task);
+    }
+
 }

@@ -11,6 +11,7 @@ public interface ITaskRepository {
     public List<Task> getAll();
     public List<Task> findTasksByDate(LocalDate date);
     public Task save(Task task);
+    public boolean remove(String id);
     public void getById(String id);
-    public void update();
+    public Task update(String id, Task task);
 }
