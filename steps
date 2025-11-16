@@ -2,16 +2,11 @@ done 1) add backend in spring
 done 2) add docker
 done 3) add mongoDB -> connect it to backend
 done 4) add view and endpoints (crud) add update/delete
+5) add cron job NOW THIS
+6) add sendgrid NOW THIS
 
 change timezone in docker
 SEND TIMESTAMP FROM FRONT WITH TZ AND CONVERT IT INTO DOCKER TZ
 Minify html
 autocomplete email
-
-then this ->
-
-5) add cron job
-6) add sendgrid
-
-
 mail sender

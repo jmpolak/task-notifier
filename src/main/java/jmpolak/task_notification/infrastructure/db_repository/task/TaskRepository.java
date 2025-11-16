@@ -35,12 +35,6 @@ public class TaskRepository implements ITaskRepository{
     }
 
     @Override
-    public void getById(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getById'");
-    }
-
-    @Override
     public List<Task> findTasksByDate(LocalDate date) {
         // Convert LocalDate to start/end of day
         LocalDateTime startOfDay = date.atStartOfDay();
