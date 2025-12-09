@@ -1,7 +1,5 @@
 package jmpolak.task_notification.application.service;
 
-import java.time.LocalDate;
-
 import org.springframework.stereotype.Service;
 
 import jmpolak.task_notification.core.entity.Task;
