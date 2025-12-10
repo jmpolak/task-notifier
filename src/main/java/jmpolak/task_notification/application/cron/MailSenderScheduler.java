@@ -32,8 +32,7 @@ public class MailSenderScheduler {
         // filter tasks for time if its 13:20 we should send all tasks from 13:19:01 to
         // 13:20:00
         task.stream().forEach(t -> {
-            mailService.createMailForTask(t);
-            mailService.sendMail();
+            mailService.sendMail(mailService.createMailForTask(t));
         });
     }
 }

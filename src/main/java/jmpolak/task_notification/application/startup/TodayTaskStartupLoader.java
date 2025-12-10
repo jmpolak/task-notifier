@@ -28,7 +28,6 @@ public class TodayTaskStartupLoader {
         List<Task> todaysTasks = iTaskRepository.findTasksByDate(LocalDate.now());
 
         for (Task t : todaysTasks) {
-            System.out.println("add task: " + t.getTitle());
             publisher.publishEvent(new ScheduleTaskForTodayEvent(this, t));
         }
     }

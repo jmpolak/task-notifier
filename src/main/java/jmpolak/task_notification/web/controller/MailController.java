@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jmpolak.task_notification.application.service.MailService;
+import jmpolak.task_notification.core.entity.Mail;
 
 @RestController()
 @RequestMapping("/mail")
@@ -18,6 +19,6 @@ public class MailController {
 
     @GetMapping("execute")
     public void execute() {
-        this.mailService.sendMail();
+        this.mailService.sendMail(new Mail(null, null, null));
     }
 }

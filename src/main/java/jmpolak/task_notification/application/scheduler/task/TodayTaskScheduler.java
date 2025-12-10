@@ -32,8 +32,6 @@ public class TodayTaskScheduler implements ApplicationListener<ScheduleTaskForTo
         }
 
         // Ignore past tasks
-        System.out.println(task.getNotificationDate());
-        System.out.println(LocalDateTime.now());
         if (task.getNotificationDate().isBefore(LocalDateTime.now())) {
             return;
         }
@@ -41,12 +39,12 @@ public class TodayTaskScheduler implements ApplicationListener<ScheduleTaskForTo
         Instant instant = task.getNotificationDate().atZone(ZoneId.systemDefault()).toInstant();
         scheduler.schedule(() -> this.executeTask(task), instant);
 
-        System.out.println("Scheduled today’s task " + task.getId() + " at " + instant);
+        System.out.println("Scheduled todays task " + task.getId() + " at " + instant);
     }
 
     private void executeTask(Task task) {
-        System.out.println("Executing today's task: " + task.getTitle());
+        System.out.println("Executing todays task: " + task.getTitle());
         // Your notification logic here
-        this.mailService.sendMail();
+        this.mailService.sendMail(this.mailService.createMailForTask(task));
     }
 }
