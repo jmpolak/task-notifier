@@ -31,6 +31,7 @@ public class MailService {
 
     public void sendMail(Mail mail) {
         this.iMailSenderPort.sendMail(mail.getTo(), mail.getSubject(), mail.getHtmlBody());
+        // update task -> complete to true
     }
 
     public Mail createMailForTask(Task task) {

@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.ScheduledFuture;
+
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -37,8 +39,13 @@ public class TodayTaskScheduler implements ApplicationListener<ScheduleTaskForTo
         }
 
         Instant instant = task.getNotificationDate().atZone(ZoneId.systemDefault()).toInstant();
-        scheduler.schedule(() -> this.executeTask(task), instant);
-
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> this.executeTask(task), instant);
+        // scheduledTask.cancel(false); // we can use in memomry object here like map to
+        // store those object
+        // on startup it will populated in a new empty hash map
+        // so updates or delete will be recognized
+        // OR
+        // store it in redis
         System.out.println("Scheduled todays task " + task.getId() + " at " + instant);
     }
 
