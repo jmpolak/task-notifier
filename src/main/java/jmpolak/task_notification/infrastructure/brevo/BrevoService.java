@@ -25,7 +25,7 @@ public class BrevoService implements IMailSenderPort {
     @Override
     public void sendMail(String to, String subject, String htmlBody) {
         SendSmtpEmail email = new SendSmtpEmail();
-        email.setSender(new SendSmtpEmailSender().email(this.mailSender).name("task123"));
+        email.setSender(new SendSmtpEmailSender().email(this.mailSender).name("Task-Manager"));
         email.setTo(Collections.singletonList(new SendSmtpEmailTo().email(to)));
         email.setSubject(subject);
         email.setHtmlContent(htmlBody);

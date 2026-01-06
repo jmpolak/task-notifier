@@ -1,6 +1,15 @@
 # Use an official OpenJDK image as base
 FROM eclipse-temurin:21-jdk-alpine
 
+
+# Set timezone
+ENV TZ=Europe/Berlin
+
+# Install tzdata and set timezone
+RUN apk add --no-cache tzdata bash maven && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
 # Set a working directory in the container
 WORKDIR /app
 
