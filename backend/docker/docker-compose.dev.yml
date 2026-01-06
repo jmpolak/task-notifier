@@ -7,15 +7,15 @@ services:
     ports:
       - "27016:27017"
     volumes:
-      - ../mongo-data:/data/db
+      - ../../backend/mongo-data:/data/db
 
   task-notification:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: ../../backend
+      dockerfile: docker/Dockerfile.dev
     container_name: task-notification
     volumes:
-      - ..:/app
+      - ../../backend:/app
     ports:
       - "8000:8000"
       - "5005:5005" # Debugging port
