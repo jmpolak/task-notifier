@@ -13,4 +13,4 @@ FRONT
 
 - login / dashboard
 - make it communicate with backend
-- auth oauth
+- auth JWT

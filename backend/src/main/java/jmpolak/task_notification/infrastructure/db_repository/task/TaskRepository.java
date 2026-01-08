@@ -17,21 +17,22 @@ import jmpolak.task_notification.core.port.ITaskRepository;
 import jmpolak.task_notification.infrastructure.db.mongo.model.TaskModel;
 
 @Repository
-public class TaskRepository implements ITaskRepository{
+public class TaskRepository implements ITaskRepository {
     private final MongoTemplate mongoClient;
-    public TaskRepository(MongoTemplate mongoClient){
+
+    public TaskRepository(MongoTemplate mongoClient) {
         this.mongoClient = mongoClient;
     }
 
     @Override
     public List<Task> getAll() {
         List<TaskModel> list = this.mongoClient.findAll(TaskModel.class);
-        return list.stream().map(lm -> TaskMapper.toDomain(lm)).toList();
+        return list.stream().map(lm -> TaskMapper.toEntity(lm)).toList();
     }
 
     @Override
     public Task save(Task task) {
-        return TaskMapper.toDomain(this.mongoClient.save(TaskMapper.toEntity(task)));
+        return TaskMapper.toEntity(this.mongoClient.save(TaskMapper.toModel(task)));
     }
 
     @Override
@@ -44,7 +45,8 @@ public class TaskRepository implements ITaskRepository{
         Query query = new Query();
         query.addCriteria(Criteria.where("notificationDate").gte(startOfDay).lte(endOfDay));
         query.with(Sort.by(Sort.Direction.ASC, "notificationDate"));
-        List<Task> tasks = mongoClient.find(query, TaskModel.class).stream().map(lm -> TaskMapper.toDomain(lm)).toList();
+        List<Task> tasks = mongoClient.find(query, TaskModel.class).stream().map(lm -> TaskMapper.toEntity(lm))
+                .toList();
         return tasks;
     }
 
@@ -55,18 +57,18 @@ public class TaskRepository implements ITaskRepository{
     }
 
     @Override
-    public Task update(String id, Task task){
-                Query query = new Query(Criteria.where("_id").is(id));
+    public Task update(String id, Task task) {
+        Query query = new Query(Criteria.where("_id").is(id));
 
         Update update = new Update()
-            .set("title", task.getTitle())
-            .set("note", task.getNote())
-            .set("to", task.getTo())
-            .set("attachment", task.isAttachment())
-            .set("notificationDate", task.getNotificationDate());
+                .set("title", task.getTitle())
+                .set("note", task.getNote())
+                .set("to", task.getTo())
+                .set("attachment", task.isAttachment())
+                .set("notificationDate", task.getNotificationDate());
 
         // Find and update the document, returning the updated document
-        return TaskMapper.toDomain(mongoClient.findAndModify(query, update, TaskModel.class));
+        return TaskMapper.toEntity(mongoClient.findAndModify(query, update, TaskModel.class));
     }
-    
+
 }

@@ -42,10 +42,11 @@ export class Signup {
   }
 
   onSubmit() {
-    console.log(this.signupForm.errors);
+    const { email, password } = this.signupForm.value;
+    console.log(email, password);
     console.log(
-      this.api.getAllTasks().subscribe({
-        next: (tasks) => console.log(tasks), // ← this is the actual array returned by the server
+      this.api.signUp(email, password).subscribe({
+        next: (res) => console.log(res), // ← this is the actual array returned by the server
         error: (err) => console.error(err),
       })
     );
