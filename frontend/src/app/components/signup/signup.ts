@@ -8,8 +8,10 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../core/api/auth/auth';
+import { TokenService } from '../../core/services/token/token-service';
+import { AuthFacade } from '../../core/facade/auth/auth-facade';
 
 @Component({
   selector: 'app-signup',
@@ -20,7 +22,7 @@ import { Auth } from '../../core/api/auth/auth';
 export class Signup {
   signupForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private api: Auth) {
+  constructor(private fb: FormBuilder, private authFacade: AuthFacade) {
     this.signupForm = this.fb.group(
       {
         email: ['', [Validators.required, Validators.email]],
@@ -44,11 +46,6 @@ export class Signup {
   onSubmit() {
     const { email, password } = this.signupForm.value;
     console.log(email, password);
-    console.log(
-      this.api.signUp(email, password).subscribe({
-        next: (res) => console.log(res), // ← this is the actual array returned by the server
-        error: (err) => console.error(err),
-      })
-    );
+    console.log(this.authFacade.authUser(email, password, false));
   }
 }

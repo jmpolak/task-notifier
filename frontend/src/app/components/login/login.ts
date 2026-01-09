@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Auth } from '../../core/api/auth/auth';
+import { AuthFacade } from '../../core/facade/auth/auth-facade';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +13,7 @@ import { Auth } from '../../core/api/auth/auth';
 export class Login {
   loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private api: Auth) {
+  constructor(private fb: FormBuilder, private authFacade: AuthFacade) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
@@ -24,13 +24,7 @@ export class Login {
     if (this.loginForm.valid) {
       console.log('Login data:', this.loginForm.value);
       const { email, password } = this.loginForm.value;
-      console.log(
-        this.api.login(email, password).subscribe({
-          next: (res) => console.log(res), // ← this is the actual array returned by the server
-          error: (err) => console.error(err),
-        })
-      );
-      // Call your authentication service here
+      this.authFacade.authUser(email, password, true);
     }
   }
 }

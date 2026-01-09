@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jmpolak.task_notification.application.service.UserService;
-import jmpolak.task_notification.web.dto.CreateUserDto;
+import jmpolak.task_notification.web.dto.LogInOrSignUp;
+import jmpolak.task_notification.web.dto.ResponseLogInOrSignUpDto;
 
 @RestController
 @RequestMapping("user")
@@ -18,16 +19,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    // login
     @PostMapping("login")
-    public String login(@Valid @RequestBody CreateUserDto entity) {
+    public ResponseLogInOrSignUpDto login(@Valid @RequestBody LogInOrSignUp entity) {
         // give back auth cookie
-        return this.userService.loginUser(CreateUserDto.toEntity(entity));
+        return ResponseLogInOrSignUpDto.toResponse(this.userService.loginUser(LogInOrSignUp.toEntity(entity)));
     }
 
     @PostMapping("sign-up")
-    public String signUp(@Valid @RequestBody CreateUserDto entity) {
-        return this.userService.createUserAndLogin(CreateUserDto.toEntity(entity));
+    public ResponseLogInOrSignUpDto signUp(@Valid @RequestBody LogInOrSignUp entity) {
+        return ResponseLogInOrSignUpDto.toResponse(this.userService.createUserAndLogin(LogInOrSignUp.toEntity(entity)));
     }
-    // sign up
 }
