@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class BaseController {
     @GetMapping()
     public String getIndex() {
-        return "index1";
+        return "index";
     }
 
 }

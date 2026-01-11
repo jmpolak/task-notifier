@@ -1,0 +1,131 @@
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.date-selector input[type="date"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.date-selector button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.date-selector .create-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.date-selector button:hover {
+  background-color: #357a38;
+  color: white;
+}
+
+.formatted {
+  width: 100%;
+  text-align: center;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Task cards */
+.task-card {
+  background-color: #fafafa;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.1s;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-title {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.task-note {
+  font-style: italic;
+  color: #666;
+}
+
+.task-to,
+.task-notification {
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Task buttons */
+.task-actions button {
+  margin-left: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.update-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.update-btn:hover {
+  background-color: #1769aa;
+}
+
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #aa2e25;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  margin-top: 20px;
+}

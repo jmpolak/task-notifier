@@ -1,4 +1,5 @@
 package jmpolak.task_notification.web.controller;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,11 +24,11 @@ import jmpolak.task_notification.web.dto.UpdateTaskDto;
 
 @RestController
 @RequestMapping("/task")
-public class TaskController{
+public class TaskController {
 
     private final TaskService taskService;
-    
-    public TaskController(TaskService taskService){
+
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
 
@@ -38,8 +39,7 @@ public class TaskController{
 
     @GetMapping("by-date")
     public List<ResponseTaskDto> getTasksByDate(
-        @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date
-    ) {
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
         return taskService.getTasksByDate(date).stream().map(t -> ResponseTaskDto.toResponse(t)).toList();
     }
 
@@ -57,6 +57,5 @@ public class TaskController{
     public boolean deleteTask(@PathVariable String id) {
         return taskService.deleteTask(id);
     }
-    
-    
+
 }

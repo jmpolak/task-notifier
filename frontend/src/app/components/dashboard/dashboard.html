@@ -1,1 +1,48 @@
-<p>dashboard works!</p>
+<div class="container">
+  <h1>Task Manager</h1>
+  <!-- Date Selector -->
+  <div class="date-selector">
+    <button (click)="changeDate(-1)">&lt;</button>
+    <input type="date" [(ngModel)]="taskDate" (change)="fetchTasksByDate()" />
+    <button (click)="changeDate(1)">&gt;</button>
+    <button (click)="openModal()">Create</button>
+    <div class="formatted">{{ formattedDate }}</div>
+  </div>
+
+  <!-- Task List -->
+  <div *ngIf="tasksData.length === 0" class="empty">
+    No tasks for this date.
+  </div>
+  <div *ngFor="let task of tasksData" class="task">
+    <div>
+      <strong>{{ task.title }}</strong><br />
+      <small>{{ task.note }}</small><br />
+      <small>To: {{ task.to || '-' }}</small><br />
+      <small>Notification: {{ formatDateDisplay(task.notificationDate) }}</small>
+    </div>
+    <div class="buttons">
+      <button (click)="editTask(task)">Update</button>
+      <button (click)="deleteTask(task.id)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" *ngIf="isModalOpen">
+  <div class="modal-content">
+    <h3>{{ isEditMode ? 'Update Task' : 'Create Task' }}</h3>
+
+    <input placeholder="Title" [(ngModel)]="taskForm.title" />
+    <textarea placeholder="Note" [(ngModel)]="taskForm.note"></textarea>
+    <input placeholder="To" [(ngModel)]="taskForm.to" />
+    <label>
+      <input type="checkbox" [(ngModel)]="taskForm.attachment" /> Has Attachment
+    </label>
+    <input type="datetime-local" [(ngModel)]="taskForm.notificationDate" />
+
+    <div class="actions">
+      <button (click)="saveTask()">{{ isEditMode ? 'Update' : 'Save' }}</button>
+      <button (click)="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>

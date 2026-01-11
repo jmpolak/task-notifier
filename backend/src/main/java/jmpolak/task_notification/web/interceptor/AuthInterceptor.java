@@ -26,14 +26,13 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String token = authHeader.substring(7); // remove "Bearer "
-        return JwtUtil.validateToken(token);
+        boolean tokenValid = JwtUtil.validateToken(token);
+        if (!tokenValid) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+            response.getWriter().write("{\"error\":\"Token invalid\"}");
+            response.setContentType("application/json");
+            return false; // block the request
+        }
+        return true;
     }
-
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-            ModelAndView modelAndView) throws Exception {
-        // TODO Auto-generated method stub
-        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
-    }
-
 }

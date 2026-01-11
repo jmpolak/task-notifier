@@ -17,17 +17,16 @@ export class AuthGuard implements CanActivateChild {
 
   canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const currentUrl = state.url;
-    console.log(this.tokenService.isLoggedIn());
     // Check if user is logged in
     if (this.tokenService.isLoggedIn()) {
       if (this.loginInRoutes.includes(currentUrl)) {
-        //this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard']); // we can/ should redirect in backend
       }
       return true; // allow access
     }
 
-    // Not logged in → redirect to login
+    // Not logged in - redirect to login
     if (!this.loginInRoutes.includes(currentUrl)) this.router.navigate(['/']);
-    return false;
+    return true;
   }
 }

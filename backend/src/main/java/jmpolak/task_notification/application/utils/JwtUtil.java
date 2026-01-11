@@ -10,7 +10,7 @@ import javax.crypto.SecretKey;
 
 public class JwtUtil {
     private static SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);; // @ToDo: put into app properties
-    private static long expirationMs = 3600000; // 1 hour
+    private static long expirationMs = 60000; // 1 min x 60
 
     public static String generateToken(String username) {
         return Jwts.builder()
